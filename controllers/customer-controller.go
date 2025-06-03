@@ -38,5 +38,7 @@ func CreateCustomer(c *gin.Context) {
 		return
 	}
 
+	//save user in my OIDC provide //pass username (email + password)
+
 	c.JSON(http.StatusCreated, customer)
 }

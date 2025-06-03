@@ -3,7 +3,9 @@ package controllers
 import (
 	"Savannah_Screening_Test/config"
 	"Savannah_Screening_Test/entity"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
@@ -14,7 +16,7 @@ type OrderItemRequest struct {
 }
 
 type CreateOrderRequest struct {
-	CustomerID string             `json:"customer_id" binding:"required"`
+	//CustomerID string             `json:"customer_id" binding:"required"`
 	OrderItems []OrderItemRequest `json:"order_items" binding:"required,dive"` //must not be nil, also validate the items of the list{slice}
 }
 
@@ -26,7 +28,11 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 
-	customerUUID, err := ParseUUID(request.CustomerID)
+	claims := c.MustGet("user").(jwt.MapClaims)
+	customerID := claims["sub"].(string)
+	fmt.Println("customer making order is:: " + customerID)
+
+	customerUUID, err := ParseUUID(customerID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid customer ID"}) //validate customer ID itself in DB
 		return
@@ -75,4 +81,22 @@ func CreateOrder(c *gin.Context) {
 
 	tx.Commit()
 	c.JSON(http.StatusCreated, gin.H{"message": "Order created", "order_id": order.ID})
+}
+
+func GetOrdersByCustomer(c *gin.Context) {
+	claims := c.MustGet("user").(jwt.MapClaims)
+	customerID := claims["sub"].(string)
+
+	customerUUID, err := ParseUUID(customerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid customer ID"})
+		return
+	}
+
+	var orders []entity.Order
+	if err := config.DB.Preload("Items.Product").Where("customer_id = ?", customerUUID).Find(&orders).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve orders"})
+		return
+	}
+	c.JSON(http.StatusOK, orders)
 }

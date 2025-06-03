@@ -43,3 +43,25 @@ func CreateProduct(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"product": product})
 }
+
+func GetProducts(c *gin.Context) {
+	categoryID := c.Query("category_id")
+	var products []entity.Product
+
+	query := config.DB.Preload("Category")
+	if categoryID != "" {
+		valCategoryUUID, err := ParseUUID(categoryID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "CategoryID is invalid"})
+			return
+		}
+		query = query.Where("category_id = ?", valCategoryUUID)
+	}
+
+	if err := query.Find(&products).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve products"})
+		return
+	}
+
+	c.JSON(http.StatusOK, products)
+}
