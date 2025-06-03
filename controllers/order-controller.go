@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"Savannah_Screening_Test/clients"
 	"Savannah_Screening_Test/config"
 	"Savannah_Screening_Test/entity"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
+	"os"
 )
 
 type OrderItemRequest struct {
@@ -30,6 +32,7 @@ func CreateOrder(c *gin.Context) {
 
 	claims := c.MustGet("user").(jwt.MapClaims)
 	customerID := claims["sub"].(string)
+	customerName := claims["name"].(string)
 	fmt.Println("customer making order is:: " + customerID)
 
 	customerUUID, err := ParseUUID(customerID)
@@ -50,6 +53,7 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 
+	var orderTotal float64
 	for _, orderItem := range request.OrderItems {
 		productUUID, err := ParseUUID(orderItem.ProductID)
 		if err != nil {
@@ -65,6 +69,8 @@ func CreateOrder(c *gin.Context) {
 			return
 		}
 
+		orderTotal = orderTotal + (product.Price * float64(orderItem.Quantity))
+
 		orderItem := entity.OrderItem{
 			OrderID:   order.ID,
 			ProductID: product.ID,
@@ -78,8 +84,15 @@ func CreateOrder(c *gin.Context) {
 			return
 		}
 	}
-
 	tx.Commit()
+
+	customerPhoneNumber := os.Getenv("AFRICASTALKING_SANDBOX_CLIENT_NUMBER")
+	customerOrderSummary := fmt.Sprintf("Order with ID %s created for customer %s", order.ID, customerName)
+	orderSummary := fmt.Sprintf("New order by %s (customer ID: %s):\nTotal: %f", customerName, customerID, orderTotal)
+
+	clients.SendSMSAsync(customerPhoneNumber, customerOrderSummary)
+	clients.SendAdminEmailAsync("New Order Received", orderSummary)
+
 	c.JSON(http.StatusCreated, gin.H{"message": "Order created", "order_id": order.ID})
 }
 

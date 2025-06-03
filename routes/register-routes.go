@@ -23,4 +23,8 @@ func RegisterRoutes(r *gin.Engine) {
 	api.POST("/categories", middlewares.RequireAuth("backend_admin"), controllers.CreateCategory)
 	api.POST("/users/signup", controllers.SignUpHandler)
 	api.POST("/users/signin", controllers.LoginHandler)
+
+	api.POST("/send-message", controllers.SendTestMessage)
+	api.POST("/send-email", controllers.SendTestEmail)
+
 }
