@@ -61,3 +61,14 @@ jobs:
 
 #  go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 #  Create .github/workflows/go.yml:
+
+
+  //@title Savannah Informatics Mid Level Backend Tests (An Online Market)
+  //@version 1.0
+  //@description Products, Categories, Customers & Orders
+  //@host localhost:8088
+  //@BasePath /api/v1
+  //@securityDefinitions.oauth2.password OAuth2Password
+  //@tokenUrl http://localhost:8080/realms/master/protocol/openid-connect/token
+  //@scope profile email
+  //@in header

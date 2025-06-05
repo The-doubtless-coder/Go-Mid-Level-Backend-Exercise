@@ -1,0 +1,762 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for handling customer signups, orders, and product data.",
+        "title": "Savannah Screening API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Ian Wanyonyi Wanjala",
+            "email": "your-email@example.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8088",
+    "basePath": "/",
+    "paths": {
+        "/categories": {
+            "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Create a new category for a product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "parameters": [
+                    {
+                        "description": "Create Category Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateCategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a list of orders made by the logged-in customer",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get all orders for the authenticated customer",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.OrderResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create an order for the authenticated customer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Create a new order for the authenticated user",
+                "parameters": [
+                    {
+                        "description": "Order Info",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
+            "get": {
+                "description": "Retrieves a list of all products, optionally filtered by category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get all products",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Category UUID to filter by",
+                        "name": "category_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.GetAllProductsResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a product with optional category assignment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Create a new product",
+                "parameters": [
+                    {
+                        "description": "Product to create",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/average-prices": {
+            "get": {
+                "description": "Retrieves the average price of products grouped by category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get average product price per category",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.AvgPriceResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/send-email": {
+            "post": {
+                "description": "Sends a test email to the system administrator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messaging"
+                ],
+                "summary": "Send a test email",
+                "parameters": [
+                    {
+                        "description": "Email payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.EmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/send-message": {
+            "post": {
+                "description": "Sends an SMS message to a specified recipient using the SMS gateway",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messaging"
+                ],
+                "summary": "Send a test SMS message",
+                "parameters": [
+                    {
+                        "description": "Message payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.MessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/signin": {
+            "post": {
+                "description": "Authenticates a user via password grant and returns an access and refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Customer login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login success",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/signup": {
+            "post": {
+                "description": "Creates a customer in Keycloak as a USER and stores the customer in the local DB",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register a new customer",
+                "parameters": [
+                    {
+                        "description": "Sign up request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.SignUpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.MessageRequest": {
+            "type": "object",
+            "required": [
+                "message",
+                "to"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.AvgPriceResponse": {
+            "type": "object",
+            "properties": {
+                "average_price": {
+                    "type": "number"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "category_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.CreateCategoryRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.CreateCategoryResponse": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "category_parent_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "order_items"
+            ],
+            "properties": {
+                "order_items": {
+                    "description": "CustomerID string             `json:\"customer_id\" binding:\"required\"`",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.OrderItemRequest"
+                    }
+                }
+            }
+        },
+        "dtos.CreateProductRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "dtos.CreateProductResponse": {
+            "type": "object",
+            "properties": {
+                "categoryID": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.EmailRequest": {
+            "type": "object",
+            "required": [
+                "message",
+                "subject"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.GetAllProductsResponse": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOi..."
+                },
+                "expires_in": {
+                    "type": "integer",
+                    "example": 3600
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOi..."
+                }
+            }
+        },
+        "dtos.OrderItemRequest": {
+            "type": "object",
+            "required": [
+                "product_id",
+                "quantity"
+            ],
+            "properties": {
+                "product_id": {
+                    "description": "OrderID   string `json:\"order_id\" binding:\"required\"`",
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.OrderItemsResponse": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "customer_id": {
+                    "type": "string"
+                },
+                "order_date": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "order_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.OrderItemsResponse"
+                    }
+                }
+            }
+        },
+        "dtos.SignUpRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "OAuth2Password": {
+            "type": "oauth2",
+            "flow": "password",
+            "tokenUrl": "http://localhost:8080/realms/master/protocol/openid-connect/token"
+        }
+    }
+}

@@ -15,6 +15,7 @@ type AvgPriceResponse struct {
 	AveragePrice float64 `json:"average_price"`
 }
 
+// CreateProductRequest represents product creation payload
 type CreateProductRequest struct {
 	Name        string  `json:"name" binding:"required"`
 	Description string  `json:"description" binding:"required"`
@@ -47,6 +48,7 @@ type OrderResponse struct {
 	OrderItems []OrderItemsResponse `json:"order_items"`
 }
 
+// CreateProductResponse represents product response data
 type CreateProductResponse struct {
 	ProductID   string  `json:"product_id"`
 	ProductName string  `json:"product_name"`
@@ -68,4 +70,19 @@ type GetAllProductsResponse struct {
 	Price        float64 `json:"price"`
 	CategoryID   string  `json:"category_id"`
 	CategoryName string  `json:"category_name"`
+}
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+type EmailRequest struct {
+	Subject string `json:"subject" binding:"required"`
+	Message string `json:"message" binding:"required"`
+}
+
+type LoginResponse struct {
+	AccessToken  string `json:"access_token" example:"eyJhbGciOi..."`
+	RefreshToken string `json:"refresh_token" example:"eyJhbGciOi..."`
+	ExpiresIn    int    `json:"expires_in" example:"3600"`
 }

@@ -1,0 +1,503 @@
+basePath: /
+definitions:
+  controllers.MessageRequest:
+    properties:
+      message:
+        type: string
+      to:
+        type: string
+    required:
+    - message
+    - to
+    type: object
+  dtos.AvgPriceResponse:
+    properties:
+      average_price:
+        type: number
+      category_id:
+        type: string
+      category_name:
+        type: string
+    type: object
+  dtos.CreateCategoryRequest:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: string
+    required:
+    - name
+    type: object
+  dtos.CreateCategoryResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      category_parent_id:
+        type: string
+      created_at:
+        type: string
+    type: object
+  dtos.CreateOrderRequest:
+    properties:
+      order_items:
+        description: CustomerID string             `json:"customer_id" binding:"required"`
+        items:
+          $ref: '#/definitions/dtos.OrderItemRequest'
+        type: array
+    required:
+    - order_items
+    type: object
+  dtos.CreateProductRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - description
+    - name
+    - price
+    type: object
+  dtos.CreateProductResponse:
+    properties:
+      categoryID:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      product_name:
+        type: string
+    type: object
+  dtos.EmailRequest:
+    properties:
+      message:
+        type: string
+      subject:
+        type: string
+    required:
+    - message
+    - subject
+    type: object
+  dtos.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  dtos.GetAllProductsResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      product_name:
+        type: string
+    type: object
+  dtos.LoginRequest:
+    properties:
+      password:
+        minLength: 8
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dtos.LoginResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOi...
+        type: string
+      expires_in:
+        example: 3600
+        type: integer
+      refresh_token:
+        example: eyJhbGciOi...
+        type: string
+    type: object
+  dtos.OrderItemRequest:
+    properties:
+      product_id:
+        description: OrderID   string `json:"order_id" binding:"required"`
+        type: string
+      quantity:
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  dtos.OrderItemsResponse:
+    properties:
+      price:
+        type: number
+      product_id:
+        type: string
+      product_name:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  dtos.OrderResponse:
+    properties:
+      customer_id:
+        type: string
+      order_date:
+        type: string
+      order_id:
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/dtos.OrderItemsResponse'
+        type: array
+    type: object
+  dtos.SignUpRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    type: object
+host: localhost:8088
+info:
+  contact:
+    email: your-email@example.com
+    name: Ian Wanyonyi Wanjala
+  description: API for handling customer signups, orders, and product data.
+  termsOfService: http://swagger.io/terms/
+  title: Savannah Screening API
+  version: "1.0"
+paths:
+  /categories:
+    post:
+      consumes:
+      - application/json
+      description: Create a new category for a product
+      parameters:
+      - description: Create Category Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.CreateCategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      tags:
+      - Categories
+  /orders:
+    get:
+      description: Returns a list of orders made by the logged-in customer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.OrderResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all orders for the authenticated customer
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create an order for the authenticated customer
+      parameters:
+      - description: Order Info
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new order for the authenticated user
+      tags:
+      - orders
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all products, optionally filtered by category
+      parameters:
+      - description: Category UUID to filter by
+        format: uuid
+        in: query
+        name: category_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.GetAllProductsResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Get all products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Creates a product with optional category assignment
+      parameters:
+      - description: Product to create
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.CreateProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Create a new product
+      tags:
+      - products
+  /products/average-prices:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the average price of products grouped by category
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.AvgPriceResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Get average product price per category
+      tags:
+      - products
+  /send-email:
+    post:
+      consumes:
+      - application/json
+      description: Sends a test email to the system administrator
+      parameters:
+      - description: Email payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.EmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Send a test email
+      tags:
+      - messaging
+  /send-message:
+    post:
+      consumes:
+      - application/json
+      description: Sends an SMS message to a specified recipient using the SMS gateway
+      parameters:
+      - description: Message payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.MessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Send a test SMS message
+      tags:
+      - messaging
+  /users/signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user via password grant and returns an access and
+        refresh token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login success
+          schema:
+            $ref: '#/definitions/dtos.LoginResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Customer login
+      tags:
+      - auth
+  /users/signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a customer in Keycloak as a USER and stores the customer
+        in the local DB
+      parameters:
+      - description: Sign up request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input or email already exists
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Register a new customer
+      tags:
+      - auth
+securityDefinitions:
+  OAuth2Password:
+    flow: password
+    tokenUrl: http://localhost:8080/realms/master/protocol/openid-connect/token
+    type: oauth2
+swagger: "2.0"

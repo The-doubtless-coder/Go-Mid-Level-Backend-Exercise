@@ -7,6 +7,17 @@ import (
 	"net/http"
 )
 
+// LoginHandler godoc
+// @Summary Customer login
+// @Description Authenticates a user via password grant and returns an access and refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dtos.LoginRequest true "Login credentials"
+// @Success 200 {object} dtos.LoginResponse "Login success"
+// @Failure 400 {object} dtos.ErrorResponse "Invalid input"
+// @Failure 401 {object} dtos.ErrorResponse "Invalid credentials"
+// @Router /users/signin [post]
 func LoginHandler(c *gin.Context) {
 	var request dtos.LoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -21,9 +32,11 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"access_token":  token.AccessToken,
-		"refresh_token": token.RefreshToken,
-		"expires_in":    token.ExpiresIn,
-	})
+	response := dtos.LoginResponse{
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+		ExpiresIn:    token.ExpiresIn,
+	}
+
+	c.JSON(http.StatusOK, response)
 }

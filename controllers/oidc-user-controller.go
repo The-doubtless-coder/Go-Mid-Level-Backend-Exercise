@@ -10,13 +10,17 @@ import (
 	"net/http"
 )
 
-type SignUpRequest struct {
-	Email    string `json:"email" binding:"required" validate:"email"`
-	Password string `json:"password" binding:"required,min=8"`
-	Name     string `json:"name" binding:"required"`
-	Phone    string `json:"phone" binding:"required" validate:"phone"`
-}
-
+// SignUpHandler godoc
+// @Summary Register a new customer
+// @Description Creates a customer in Keycloak as a USER and stores the customer in the local DB
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dtos.SignUpRequest true "Sign up request payload"
+// @Success 201 {object} map[string]interface{} "User created"
+// @Failure 400 {object} dtos.ErrorResponse "Invalid input or email already exists"
+// @Failure 500 {object} dtos.ErrorResponse "Server error"
+// @Router /users/signup [post]
 func SignUpHandler(c *gin.Context) {
 	var request dtos.SignUpRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

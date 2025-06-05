@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"Savannah_Screening_Test/clients"
+	"Savannah_Screening_Test/dtos"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,6 +12,17 @@ type MessageRequest struct {
 	To      string `json:"to" binding:"required"`
 }
 
+// SendTestMessage godoc
+// @Summary Send a test SMS message
+// @Description Sends an SMS message to a specified recipient using the SMS gateway
+// @Tags messaging
+// @Accept json
+// @Produce json
+// @Param request body MessageRequest true "Message payload"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} dtos.ErrorResponse
+// @Failure 500 {object} dtos.ErrorResponse
+// @Router /send-message [post]
 func SendTestMessage(c *gin.Context) {
 	var request MessageRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -25,13 +37,19 @@ func SendTestMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "message sent successfully"})
 }
 
-type EmailRequest struct {
-	Subject string `json:"subject" binding:"required"`
-	Message string `json:"message" binding:"required"`
-}
-
+// SendTestEmail godoc
+// @Summary Send a test email
+// @Description Sends a test email to the system administrator
+// @Tags messaging
+// @Accept json
+// @Produce json
+// @Param request body dtos.EmailRequest true "Email payload"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} dtos.ErrorResponse
+// @Failure 500 {object} dtos.ErrorResponse
+// @Router /send-email [post]
 func SendTestEmail(c *gin.Context) {
-	var request EmailRequest
+	var request dtos.EmailRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

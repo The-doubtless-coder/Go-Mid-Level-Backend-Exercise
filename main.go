@@ -8,8 +8,27 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "Savannah_Screening_Test/docs"
 )
 
+// @title Savannah Screening API
+// @version 1.0
+// @description API for handling customer signups, orders, and product data.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Ian Wanyonyi Wanjala
+// @contact.email your-email@example.com
+
+// @host localhost:8088
+// @BasePath /
+
+// @securityDefinitions.oauth2.password OAuth2Password
+// @tokenUrl http://localhost:8080/realms/master/protocol/openid-connect/token
+// @scope profile email
 func main() {
 
 	db := config.ConnectDatabase()
@@ -21,6 +40,8 @@ func main() {
 	}
 
 	r := gin.Default()
+	r.GET("/swagger/*any" /*security middleware if I want*/, ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	routes.RegisterRoutes(r, db)
 
 	era := godotenv.Load(".env")
