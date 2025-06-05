@@ -16,12 +16,12 @@ func main() {
 	err := migrations.AutoMigrate(db)
 	if err != nil {
 		log.Fatal("Migration failed:", err)
+	} else {
+		log.Println("Migration succeeded")
 	}
 
-	log.Println("Migrations complete")
-
 	r := gin.Default()
-	routes.RegisterRoutes(r)
+	routes.RegisterRoutes(r, db)
 
 	era := godotenv.Load(".env")
 	if era != nil {
