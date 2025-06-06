@@ -1,0 +1,81 @@
+version: '3.9'
+
+services:
+  go-backend:
+    build: .
+    env_file:
+      - .env
+    container_name: go-backend
+    ports:
+      - "8083:8080"
+    depends_on:
+      - db
+      - keycloak
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=savannah_test_db
+      - KEYCLOAK_URL=http://keycloak:8085
+      - KEYCLOAK_REALM=master
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      #DB_USER=wanjalize
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SSLMODE=${DB_SSLMODE}
+      - SERVER_PORT=${SERVER_PORT}
+      - OIDC_PROVIDER_URL=${OIDC_PROVIDER_URL}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_GRANT_TYPE=${OIDC_GRANT_TYPE}
+      #KEYCLOAK_TOKEN_URL=http://localhost:8080/realms/master/protocol/openid-connect/token
+      - KEYCLOAK_TOKEN_URL=${KEYCLOAK_TOKEN_URL}
+      - KEYCLOAK_CUSTOMER_CLIENT_ID=${KEYCLOAK_CUSTOMER_CLIENT_ID}
+      - KEYCLOAK_CUSTOMER_CLIENT_SECRET=${KEYCLOAK_CUSTOMER_CLIENT_SECRET}
+      - KEYCLOAK_CREATE_USER_URL=${KEYCLOAK_CREATE_USER_URL}
+      - KEYCLOAK_ASSIGN_ROLE_URL=${KEYCLOAK_ASSIGN_ROLE_URL}
+      #KEYCLOAK_JWKS_URL=http://localhost:8080/realms/master/protocol/openid-connect/certs
+      - KEYCLOAK_JWKS_URL=${KEYCLOAK_JWKS_URL}
+      - AFRICASTALKING_USERNAME=${AFRICASTALKING_USERNAME}
+      - AFRICASTALKING_SANDBOX_CLIENT_NUMBER=${AFRICASTALKING_SANDBOX_CLIENT_NUMBER}
+      - AFRICASTALKING_API_KEY=${AFRICASTALKING_API_KEY}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USERNAME=${EMAIL_USERNAME}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - EMAIL_SENDER=${EMAIL_SENDER}
+      - EMAIL_ADMIN_RECEIVER=${EMAIL_ADMIN_RECEIVER}
+#      - KEYCLOAK_CLIENT_ID=go-backend
+#      - KEYCLOAK_CLIENT_SECRET=
+    restart: always
+
+  db:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: savannah_test_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    container_name: keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8084:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+
+volumes:
+  pgdata:

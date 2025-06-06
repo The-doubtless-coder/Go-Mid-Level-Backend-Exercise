@@ -1,0 +1,40 @@
+{
+  "realm": "savannah",
+  "enabled": true,
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      {
+        "name": "backend_admin",
+        "description": "Administrator role for backend service accounts and users"
+      },
+      {
+        "name": "customer",
+        "description": "Customer role for application users"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "go-backend",
+      "name": "go-backend",
+      "enabled": true,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "secret": "backend-secret"
+    },
+    {
+      "clientId": "go-customer",
+      "name": "go-customer",
+      "enabled": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "secret": "customer-secret"
+    }
+  ]
+}

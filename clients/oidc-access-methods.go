@@ -24,19 +24,20 @@ func GetKeyCloakAdminToken() (string, error) {
 	if err != nil {
 		log.Fatal("Error loading .env file:: Using os files instead")
 	}
-	log.Println("Loading keycloak backend app details")
 
 	clientID := os.Getenv("OIDC_CLIENT_ID")
 	clientSecret := os.Getenv("OIDC_CLIENT_SECRET")
 	grantType := os.Getenv("OIDC_GRANT_TYPE")
-
+	tokenEndpoint := os.Getenv("KEYCLOAK_TOKEN_URL")
+	log.Println("Loading keycloak backend app details" + clientID + " VARS " + clientSecret)
 	data := url.Values{
 		"client_id":     {clientID},
 		"client_secret": {clientSecret},
 		"grant_type":    {grantType},
 	}
 
-	resp, err := http.PostForm("http://localhost:8080/realms/master/protocol/openid-connect/token", data)
+	//"http://localhost:8080/realms/master/protocol/openid-connect/token"
+	resp, err := http.PostForm(tokenEndpoint, data)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +53,10 @@ func GetKeyCloakAdminToken() (string, error) {
 }
 
 func CreateUserInKeycloak(request dtos.SignUpRequest, token string) (string, error) {
-	url := "http://localhost:8080/admin/realms/master/users"
+	keycloakCreateUserUrl := os.Getenv("KEYCLOAK_CREATE_USER_URL")
+	//http://localhost:8080/admin/realms/master/users
+
+	url := keycloakCreateUserUrl
 	userData := map[string]interface{}{
 		"username":  request.Email,
 		"email":     request.Email,
@@ -93,7 +97,10 @@ func CreateUserInKeycloak(request dtos.SignUpRequest, token string) (string, err
 
 func AssignRoleToUser(userID, roleName, token string) error {
 	// 1. Get Role ID
-	roleURL := fmt.Sprintf("http://localhost:8080/admin/realms/master/roles/%s", roleName)
+	keycloakAssignRoleUrl := os.Getenv("KEYCLOAK_ASSIGN_ROLE_URL")
+
+	//http://localhost:8080/admin/realms/master/roles/
+	roleURL := fmt.Sprintf(keycloakAssignRoleUrl+"%s", roleName)
 	req, _ := http.NewRequest("GET", roleURL, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 	resp, err := http.DefaultClient.Do(req)
@@ -109,7 +116,8 @@ func AssignRoleToUser(userID, roleName, token string) error {
 	json.NewDecoder(resp.Body).Decode(&role)
 
 	// 2. Assign Role
-	assignURL := fmt.Sprintf("http://localhost:8080/admin/realms/master/users/%s/role-mappings/realm", userID)
+	//http://localhost:8080/admin/realms/master/users/%s/role-mappings/realm
+	assignURL := fmt.Sprintf("http://keycloak:8083/admin/realms/master/users/%s/role-mappings/realm", userID)
 	rolePayload := []map[string]string{{"id": role.ID, "name": role.Name}}
 	body, _ := json.Marshal(rolePayload)
 	req, _ = http.NewRequest("POST", assignURL, bytes.NewBuffer(body))
@@ -126,7 +134,8 @@ func AssignRoleToUser(userID, roleName, token string) error {
 }
 
 func LoginWithPasswordGrant(username, password string) (*dtos.TokenResponse, error) {
-	keycloakTokenURL := os.Getenv("KEYCLOAK_TOKEN_URL") // e.g. http://localhost:8080/realms/master/protocol/openid-connect/token
+	keycloakTokenURL := os.Getenv("KEYCLOAK_TOKEN_URL")
+	//http://localhost:8080/realms/master/protocol/openid-connect/token
 
 	data := url.Values{}
 	data.Set("grant_type", "password")
@@ -166,10 +175,11 @@ func GetKeycloakPublicKey() (*rsa.PublicKey, error) {
 	if cachedKey != nil && time.Since(lastFetched) < 5*time.Minute {
 		return cachedKey, nil
 	}
+	//http://localhost:8080/realms/master/protocol/openid-connect/certs
 
 	jwksURL := os.Getenv("KEYCLOAK_JWKS_URL")
 	if jwksURL == "" {
-		jwksURL = "http://localhost:8080/realms/master/protocol/openid-connect/certs"
+		jwksURL = "http://keycloak:8083/realms/master/protocol/openid-connect/certs"
 	}
 
 	resp, err := http.Get(jwksURL)
