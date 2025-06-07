@@ -115,4 +115,11 @@ CI config in .github/workflows/ci.yml
 Find file in root directory
 docker-compose up --build
 
+## 📄 API Documentation
+Swagger docs auto-generated via annotations.
+Accessible at: http://localhost:8083/swagger/index.html or the port that you are running the project at.
+
+
+
+
 
